@@ -2,4 +2,53 @@ parameters:
   vshn_sli_reporting:
     =_metadata:
       multi_tenant: true
-    namespace: syn-vshn-sli-reporting
+    namespace: ${_instance}
+    namespaceMetadata: {}
+
+    images:
+      sli_reporting:
+        registry: ghcr.io
+        repository: vshn/vshn-sli-reporting
+        tag: v0.1.2
+
+    auth:
+      user: admin
+      password: null
+
+    db_file: /data/data.db
+
+    server:
+      host: 0.0.0.0
+      port: 8080
+
+    lieutenant:
+      k8s_url: null
+      sa_token: null
+      namespace: lieutenant
+
+    network_policies:
+      target_namespaces: {}
+
+
+    pvcs: {
+      vshn-sli-reporting-db: {
+        resources: {
+          requests: {
+            storage: 1Gi
+          }
+        }
+      }
+    }
+
+    volumes: {
+      db: {
+        mount_spec: {
+          mountPath: "/data"
+        },
+        volume_spec: {
+          persistentVolumeClaim: {
+            claimName: vshn-sli-reporting-db
+          }
+        },
+      }
+    }

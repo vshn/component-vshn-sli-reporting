@@ -10,10 +10,153 @@ default:: `syn-vshn-sli-reporting`
 
 The namespace in which to deploy this component.
 
+== `images`
+
+[horizontal]
+type:: dict
+default:: See https://github.com/vshn/component-vshn-sli-reporting/blob/master/class/defaults.yml[`class/defaults.yml`]
+
+A list of images to be used by the component.
+
+== `auth.user`
+
+[horizontal]
+type:: string
+default:: "admin"
+
+Username for HTTP basic authentication required by the SLI reporting API.
+
+== `auth.password`
+
+[horizontal]
+type:: string
+
+Password for HTTP basic authentication required by the SLI reporting API.
+Required parameter.
+
+== `db_file`
+[horizontal]
+type:: string
+default:: "/data/data.db"
+
+Path of the sqlite database file to use.
+
+== `server.host`
+[horizontal]
+type:: string
+default:: "0.0.0.0"
+
+Host address which the server should bind.
+
+== `server.port`
+[horizontal]
+type:: number
+default:: 8080
+
+Container port which the server should bind.
+
+== `lieutenant.k8s_url`
+[horizontal]
+type:: string
+
+API URL where the kubernetes API of the Lieutenant cluster can be reached.
+Required.
+
+== `lieutenant.sa_token`
+[horizontal]
+type:: string
+
+Service account token which is able to get clusters on the Lieutenant cluster.
+Required.
+
+== `lieutenant.namespace`
+[horizontal]
+type:: string
+default:: lieutenant
+
+Namespace in which Cluster resources can be found on the Lieutenant cluster.
+
+== `network_policies.target_namespaces`
+
+[horizontal]
+type:: dictionary
+default:: `{}`
+example::
++
+[source,yaml]
+----
+appuio-reporting-database: true
+appuio-thanos: true
+----
+
+Injects a network policy into the target namespace given by the key, allowing communication to the namespace.
+
+[NOTE]
+This is a workaround and the parameter will disappear once we've a more native way to manage network policies with Project Syn.
+
+== `pvcs`
+
+[horizontal]
+type:: dict
+default:: See https://github.com/vshn/component-vshn-sli-reporting/blob/master/class/defaults.yml[`class/defaults.yml`]
+
+A list of PVCs to be created by the component.
+
+== `volumes`
+
+[horizontal]
+type:: dict
+default:: See https://github.com/vshn/component-vshn-sli-reporting/blob/master/class/defaults.yml[`class/defaults.yml`]
+
+A list of volumes to be mounted into the container.
+
 
 == Example
 
 [source,yaml]
 ----
 namespace: example-namespace
+images:
+    sli_reporting:
+    registry: ghcr.io
+    repository: vshn/vshn-sli-reporting
+    tag: v0.1.2
+
+auth:
+    user: admin
+    password: SuperSecretPassword
+
+db_file: /data/data.db
+
+server:
+    host: 0.0.0.0
+    port: 8080
+
+lieutenant:
+    k8s_url: https://my.lieutenant.k8s.api.url
+    sa_token: eySomeApiToken
+    namespace: lieutenant
+
+pvcs: {
+    vshn-sli-reporting-db: {
+        resources: {
+            requests: {
+            storage: 1Gi
+            }
+        }
+    }
+}
+
+volumes: {
+    db: {
+        mount_spec: {
+            mountPath: "/data"
+        },
+        volume_spec: {
+            persistentVolumeClaim: {
+            claimName: vshn-sli-reporting-db
+            }
+        },
+    }
+}
 ----

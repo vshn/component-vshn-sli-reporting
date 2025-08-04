@@ -1,0 +1,109 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  annotations: {}
+  labels:
+    app.kubernetes.io/managed-by: commodore
+    app.kubernetes.io/name: appuio-reporting
+    app.kubernetes.io/part-of: syn
+    name: vshn-sli-reporting
+  name: vshn-sli-reporting
+  namespace: vshn-sli-reporting
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/managed-by: commodore
+      app.kubernetes.io/name: appuio-reporting
+      app.kubernetes.io/part-of: syn
+      name: vshn-sli-reporting
+  serviceName: vshn-sli-reporting
+  template:
+    metadata:
+      annotations: {}
+      labels:
+        app.kubernetes.io/managed-by: commodore
+        app.kubernetes.io/name: appuio-reporting
+        app.kubernetes.io/part-of: syn
+        name: vshn-sli-reporting
+    spec:
+      containers:
+        - args:
+            - vshn-sli-reporting serve --auth-user ${VSR_AUTH_USER} --auth-pass ${VSR_AUTH_PASS}
+              --lieutenant-namespace ${VSR_LIEUTENANT_NAMESPACE} --lieutenant-k8s-url
+              ${VSR_LIEUTENANT_K8S_URL} --lieutenant-sa-token ${VSR_LIEUTENANT_SA_TOKEN}
+              --db-file /data/data.db --port 8080 --host 0.0.0.0
+          command:
+            - sh
+            - -c
+          env:
+            - name: VSR_AUTH_USER
+              value: admin
+            - name: VSR_AUTH_PASS
+              valueFrom:
+                secretKeyRef:
+                  key: password
+                  name: vshn-sli-reporting-auth
+            - name: VSR_LIEUTENANT_NAMESPACE
+              value: lieutenant
+            - name: VSR_LIEUTENANT_SA_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  key: sa_token
+                  name: lieutenant-credentials
+            - name: VSR_LIEUTENANT_K8S_URL
+              valueFrom:
+                secretKeyRef:
+                  key: k8s_url
+                  name: lieutenant-credentials
+          image: ghcr.io/vshn/vshn-sli-reporting:v0.1.2
+          name: vshn-sli-reporting
+          ports:
+            - containerPort: 8080
+          volumeMounts:
+            - mountPath: /data
+              name: db
+      imagePullSecrets: []
+      initContainers:
+        - args:
+            - vshn-sli-reporting db init --db-file /data/data.db
+          command:
+            - sh
+            - -c
+          env:
+            - name: VSR_AUTH_USER
+              value: admin
+            - name: VSR_AUTH_PASS
+              valueFrom:
+                secretKeyRef:
+                  key: password
+                  name: vshn-sli-reporting-auth
+            - name: VSR_LIEUTENANT_NAMESPACE
+              value: lieutenant
+            - name: VSR_LIEUTENANT_SA_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  key: sa_token
+                  name: lieutenant-credentials
+            - name: VSR_LIEUTENANT_K8S_URL
+              valueFrom:
+                secretKeyRef:
+                  key: k8s_url
+                  name: lieutenant-credentials
+          image: ghcr.io/vshn/vshn-sli-reporting:v0.1.2
+          name: db-init
+          ports:
+            - containerPort: 8080
+          volumeMounts:
+            - mountPath: /data
+              name: db
+      terminationGracePeriodSeconds: 30
+      volumes:
+        - name: db
+          persistentVolumeClaim:
+            claimName: vshn-sli-reporting-db
+  updateStrategy:
+    rollingUpdate:
+      partition: 0
+    type: RollingUpdate
+  volumeClaimTemplates: []
