@@ -1,0 +1,5 @@
+parameters:
+  vshn_sli_reporting:
+    =_metadata:
+      multi_tenant: true
+    namespace: syn-vshn-sli-reporting

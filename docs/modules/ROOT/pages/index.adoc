@@ -1,0 +1,5 @@
+= vshn-sli-reporting
+
+vshn-sli-reporting is a Commodore component to manage vshn-sli-reporting.
+
+See the xref:references/parameters.adoc[parameters] reference for further details.

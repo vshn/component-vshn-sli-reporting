@@ -1,0 +1,6 @@
+name: vshn-sli-reporting
+title: vshn-sli-reporting
+version: master
+start_page: ROOT:index.adoc
+nav:
+  - modules/ROOT/partials/nav.adoc
