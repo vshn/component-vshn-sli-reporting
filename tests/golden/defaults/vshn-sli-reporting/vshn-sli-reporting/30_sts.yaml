@@ -62,7 +62,7 @@ spec:
             - containerPort: 8080
           volumeMounts:
             - mountPath: /data
-              name: db
+              name: vshn-sli-reporting-db
       imagePullSecrets: []
       initContainers:
         - args:
@@ -96,14 +96,23 @@ spec:
             - containerPort: 8080
           volumeMounts:
             - mountPath: /data
-              name: db
+              name: vshn-sli-reporting-db
       terminationGracePeriodSeconds: 30
-      volumes:
-        - name: db
-          persistentVolumeClaim:
-            claimName: vshn-sli-reporting-db
+      volumes: []
   updateStrategy:
     rollingUpdate:
       partition: 0
     type: RollingUpdate
-  volumeClaimTemplates: []
+  volumeClaimTemplates:
+    - metadata:
+        labels:
+          app.kubernetes.io/managed-by: commodore
+          app.kubernetes.io/name: appuio-reporting
+          app.kubernetes.io/part-of: syn
+        name: vshn-sli-reporting-db
+      spec:
+        accessModes:
+          - ReadWriteOnce
+        resources:
+          requests:
+            storage: 1Gi

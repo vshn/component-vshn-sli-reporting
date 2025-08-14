@@ -16,10 +16,7 @@ parameters:
       password: null
 
     db_file: /data/data.db
-
-    server:
-      host: 0.0.0.0
-      port: 8080
+    storage_requests: 1Gi
 
     lieutenant:
       k8s_url: null
@@ -30,25 +27,4 @@ parameters:
       target_namespaces: {}
 
 
-    pvcs: {
-      vshn-sli-reporting-db: {
-        resources: {
-          requests: {
-            storage: 1Gi
-          }
-        }
-      }
-    }
-
-    volumes: {
-      db: {
-        mount_spec: {
-          mountPath: "/data"
-        },
-        volume_spec: {
-          persistentVolumeClaim: {
-            claimName: vshn-sli-reporting-db
-          }
-        },
-      }
-    }
+    extra_volumes: {}

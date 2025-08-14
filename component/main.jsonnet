@@ -71,29 +71,23 @@ local env = [
   },
 ];
 
-local pvcs = [
-  kube.PersistentVolumeClaim(name) {
-    metadata+: {
-      labels+: common.Labels,
-    },
-    spec+: com.makeMergeable(params.pvcs[name]),
-  }
-  for name in std.objectFields(params.pvcs)
-];
-
 local container = {
   image: formatImage(params.images.sli_reporting),
   command: [ 'sh', '-c' ],
   args: [ 'vshn-sli-reporting', 'serve' ],
   ports: [
     {
-      containerPort: params.server.port,
+      containerPort: 8080,
     },
   ],
-  [if std.length(params.volumes) > 0 then 'volumeMounts']: [
-    { name: name } + params.volumes[name].mount_spec
-    for name in std.objectFields(params.volumes)
-  ],
+  volumeMounts: [ {
+                  name: 'vshn-sli-reporting-db',
+                  mountPath: '/data',
+                } ]
+                + [
+                  { name: name } + params.extra_volumes[name].mount_spec
+                  for name in std.objectFields(params.extra_volumes)
+                ],
   env: env,
 };
 
@@ -120,16 +114,33 @@ local sts = kube.StatefulSet('vshn-sli-reporting') {
           container {
             name: 'vshn-sli-reporting',
             args: [
-              'vshn-sli-reporting serve --auth-user ${VSR_AUTH_USER} --auth-pass ${VSR_AUTH_PASS} --lieutenant-namespace ${VSR_LIEUTENANT_NAMESPACE} --lieutenant-k8s-url ${VSR_LIEUTENANT_K8S_URL} --lieutenant-sa-token ${VSR_LIEUTENANT_SA_TOKEN} --db-file ' + params.db_file + ' --port ' + std.toString(params.server.port) + ' --host ' + params.server.host,
+              'vshn-sli-reporting serve --auth-user ${VSR_AUTH_USER} --auth-pass ${VSR_AUTH_PASS} --lieutenant-namespace ${VSR_LIEUTENANT_NAMESPACE} --lieutenant-k8s-url ${VSR_LIEUTENANT_K8S_URL} --lieutenant-sa-token ${VSR_LIEUTENANT_SA_TOKEN} --db-file ' + params.db_file + ' --port 8080 --host 0.0.0.0',
             ],
           },
         ],
-        [if std.length(params.volumes) > 0 then 'volumes']: [
-          { name: name } + params.volumes[name].volume_spec
-          for name in std.objectFields(params.volumes)
+        [if std.length(params.extra_volumes) > 0 then 'volumes']: [
+          { name: name } + params.extra_volumes[name].volume_spec
+          for name in std.objectFields(params.extra_volumes)
         ],
       },
     },
+    volumeClaimTemplates+: [
+
+      {
+        metadata+: {
+          labels+: common.Labels,
+          name: 'vshn-sli-reporting-db',
+        },
+        spec: {
+          accessModes: [ 'ReadWriteOnce' ],
+          resources: {
+            requests: {
+              storage: params.storage_requests,
+            },
+          },
+        },
+      },
+    ],
   },
 };
 
@@ -142,6 +153,5 @@ local sts = kube.StatefulSet('vshn-sli-reporting') {
   '01_netpols': netPol.Policies,
   '10_auth_secret': authSecret,
   '10_lieutenant_secret': lieutenantSecret,
-  '20_pvc': pvcs,
   '30_sts': sts,
 }

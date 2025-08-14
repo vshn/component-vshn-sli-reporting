@@ -41,19 +41,12 @@ default:: "/data/data.db"
 
 Path of the sqlite database file to use.
 
-== `server.host`
+== `storage_requests`
 [horizontal]
 type:: string
-default:: "0.0.0.0"
+default:: "1Gi"
 
-Host address which the server should bind.
-
-== `server.port`
-[horizontal]
-type:: number
-default:: 8080
-
-Container port which the server should bind.
+Storage requests for the database volume.
 
 == `lieutenant.k8s_url`
 [horizontal]
@@ -94,21 +87,13 @@ Injects a network policy into the target namespace given by the key, allowing co
 [NOTE]
 This is a workaround and the parameter will disappear once we've a more native way to manage network policies with Project Syn.
 
-== `pvcs`
+== `extra_volumes`
 
 [horizontal]
 type:: dict
-default:: See https://github.com/vshn/component-vshn-sli-reporting/blob/master/class/defaults.yml[`class/defaults.yml`]
+default:: {}
 
-A list of PVCs to be created by the component.
-
-== `volumes`
-
-[horizontal]
-type:: dict
-default:: See https://github.com/vshn/component-vshn-sli-reporting/blob/master/class/defaults.yml[`class/defaults.yml`]
-
-A list of volumes to be mounted into the container.
+A list of additional volumes to be mounted into the container.
 
 
 == Example
@@ -127,36 +112,18 @@ auth:
     password: SuperSecretPassword
 
 db_file: /data/data.db
-
-server:
-    host: 0.0.0.0
-    port: 8080
+storage_requests: 1Gi
 
 lieutenant:
     k8s_url: https://my.lieutenant.k8s.api.url
     sa_token: eySomeApiToken
     namespace: lieutenant
 
-pvcs: {
-    vshn-sli-reporting-db: {
-        resources: {
-            requests: {
-            storage: 1Gi
-            }
-        }
-    }
-}
-
-volumes: {
-    db: {
-        mount_spec: {
-            mountPath: "/data"
-        },
-        volume_spec: {
-            persistentVolumeClaim: {
-            claimName: vshn-sli-reporting-db
-            }
-        },
-    }
-}
+extra_volumes:
+    my_volume:
+        mount_spec:
+            mountPath: "/foo"
+        volume_spec:
+            emptyDir:
+                sizeLimit: "500Mi"
 ----
