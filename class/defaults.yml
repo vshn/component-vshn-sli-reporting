@@ -11,20 +11,27 @@ parameters:
         repository: vshn/vshn-sli-reporting
         tag: v0.1.2
 
-    auth:
-      user: admin
-      password: null
+    sli_reporting:
+      resources:
+        requests:
+          cpu: 100m
+          memory: 256Mi
+          storage: 1Gi
+        limits: {}
 
-    db_file: /data/data.db
-    storage_requests: 1Gi
+      auth:
+        user: admin
+        password: null
 
-    lieutenant:
-      k8s_url: null
-      sa_token: null
-      namespace: lieutenant
+      db_file: /data/data.db
+
+      lieutenant:
+        k8s_url: null
+        sa_token: null
+        namespace: lieutenant
+
+      extra_volumes:
+        vshn_sli_reporting: {}
 
     network_policies:
       target_namespaces: {}
-
-
-    extra_volumes: {}

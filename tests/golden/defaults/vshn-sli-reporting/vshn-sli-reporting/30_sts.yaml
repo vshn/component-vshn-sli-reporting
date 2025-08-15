@@ -11,6 +11,11 @@ metadata:
   namespace: vshn-sli-reporting
 spec:
   replicas: 1
+  resources:
+    limits: {}
+    requests:
+      cpu: 100m
+      memory: 256Mi
   selector:
     matchLabels:
       app.kubernetes.io/managed-by: commodore
@@ -29,13 +34,25 @@ spec:
     spec:
       containers:
         - args:
-            - vshn-sli-reporting serve --auth-user ${VSR_AUTH_USER} --auth-pass ${VSR_AUTH_PASS}
-              --lieutenant-namespace ${VSR_LIEUTENANT_NAMESPACE} --lieutenant-k8s-url
-              ${VSR_LIEUTENANT_K8S_URL} --lieutenant-sa-token ${VSR_LIEUTENANT_SA_TOKEN}
-              --db-file /data/data.db --port 8080 --host 0.0.0.0
+            - serve
+            - --auth-user
+            - $(VSR_AUTH_USER)
+            - --auth-pass
+            - $(VSR_AUTH_PASS)
+            - --lieutenant-namespace
+            - $(VSR_LIEUTENANT_NAMESPACE)
+            - --lieutenant-k8s-url
+            - $(VSR_LIEUTENANT_K8S_URL)
+            - --lieutenant-sa-token
+            - $(VSR_LIEUTENANT_SA_TOKEN)
+            - --db-file
+            - /data/data.db
+            - port
+            - '8080'
+            - --host
+            - 0.0.0.0
           command:
-            - sh
-            - -c
+            - vshn-sli-reporting
           env:
             - name: VSR_AUTH_USER
               value: admin
@@ -66,10 +83,12 @@ spec:
       imagePullSecrets: []
       initContainers:
         - args:
-            - vshn-sli-reporting db init --db-file /data/data.db
+            - db
+            - init
+            - --db-file
+            - /data/data.db
           command:
-            - sh
-            - -c
+            - vshn-sli-reporting
           env:
             - name: VSR_AUTH_USER
               value: admin

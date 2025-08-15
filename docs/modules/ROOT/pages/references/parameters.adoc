@@ -18,7 +18,25 @@ default:: See https://github.com/vshn/component-vshn-sli-reporting/blob/master/c
 
 A list of images to be used by the component.
 
-== `auth.user`
+== `sli_reporting.resources`
+
+[horizontal]
+type:: dict
+default::
++
+[source,yaml]
+----
+resources:
+    requests:
+        cpu: 100m
+        memory: 256Mi
+        storage: 1Gi
+    limits: {}
+----
+
+Pod resource requests and limits.
+
+== `sli_reporting.auth.user`
 
 [horizontal]
 type:: string
@@ -26,7 +44,7 @@ default:: "admin"
 
 Username for HTTP basic authentication required by the SLI reporting API.
 
-== `auth.password`
+== `sli_reporting.auth.password`
 
 [horizontal]
 type:: string
@@ -34,7 +52,7 @@ type:: string
 Password for HTTP basic authentication required by the SLI reporting API.
 Required parameter.
 
-== `db_file`
+== `sli_reporting.db_file`
 [horizontal]
 type:: string
 default:: "/data/data.db"
@@ -48,21 +66,21 @@ default:: "1Gi"
 
 Storage requests for the database volume.
 
-== `lieutenant.k8s_url`
+== `sli_reporting.lieutenant.k8s_url`
 [horizontal]
 type:: string
 
 API URL where the kubernetes API of the Lieutenant cluster can be reached.
 Required.
 
-== `lieutenant.sa_token`
+== `sli_reporting.lieutenant.sa_token`
 [horizontal]
 type:: string
 
 Service account token which is able to get clusters on the Lieutenant cluster.
 Required.
 
-== `lieutenant.namespace`
+== `sli_reporting.lieutenant.namespace`
 [horizontal]
 type:: string
 default:: lieutenant
@@ -91,9 +109,25 @@ This is a workaround and the parameter will disappear once we've a more native w
 
 [horizontal]
 type:: dict
-default:: {}
+default:: See https://github.com/vshn/component-vshn-sli-reporting/blob/master/class/defaults.yml[`class/defaults.yml`]
+example::
++
+[source,yaml]
+----
+extra_volumes:
+    vshn_sli_reporting:
+        my_volume:
+            mount_spec: <1>
+                mountPath: "/foo"
+            volume_spec: <2>
+                emptyDir:
+                    sizeLimit: "500Mi"
+----
+<1> Fields in `mount_spec` are added to the container's `volumeMount` entry for this volume.
+<2> Fields in `volume_spec` are added to the pod's `volume` entry for this volume.
 
-A list of additional volumes to be mounted into the container.
+
+A list of additional volumes to be mounted into each container.
 
 
 == Example
@@ -120,10 +154,11 @@ lieutenant:
     namespace: lieutenant
 
 extra_volumes:
-    my_volume:
-        mount_spec:
-            mountPath: "/foo"
-        volume_spec:
-            emptyDir:
-                sizeLimit: "500Mi"
+    vshn_sli_reporting:
+        my_volume:
+            mount_spec:
+                mountPath: "/foo"
+            volume_spec:
+                emptyDir:
+                    sizeLimit: "500Mi"
 ----

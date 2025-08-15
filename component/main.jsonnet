@@ -17,8 +17,8 @@ local lieutenantSecret = kube.Secret('lieutenant-credentials') {
     labels+: common.Labels,
   },
   stringData: {
-    [name]: params.lieutenant[name]
-    for name in std.objectFields(params.lieutenant)
+    [name]: params.sli_reporting.lieutenant[name]
+    for name in std.objectFields(params.sli_reporting.lieutenant)
   },
 };
 
@@ -28,15 +28,15 @@ local authSecret = kube.Secret('vshn-sli-reporting-auth') {
     labels+: common.Labels,
   },
   stringData: {
-    [name]: params.auth[name]
-    for name in std.objectFields(params.auth)
+    [name]: params.sli_reporting.auth[name]
+    for name in std.objectFields(params.sli_reporting.auth)
   },
 };
 
 local env = [
   {
     name: 'VSR_AUTH_USER',
-    value: params.auth.user,
+    value: params.sli_reporting.auth.user,
   },
   {
     name: 'VSR_AUTH_PASS',
@@ -49,7 +49,7 @@ local env = [
   },
   {
     name: 'VSR_LIEUTENANT_NAMESPACE',
-    value: params.lieutenant.namespace,
+    value: params.sli_reporting.lieutenant.namespace,
   },
   {
     name: 'VSR_LIEUTENANT_SA_TOKEN',
@@ -73,8 +73,8 @@ local env = [
 
 local container = {
   image: formatImage(params.images.sli_reporting),
-  command: [ 'sh', '-c' ],
-  args: [ 'vshn-sli-reporting', 'serve' ],
+  command: [ 'vshn-sli-reporting' ],
+  args: [ 'serve' ],
   ports: [
     {
       containerPort: 8080,
@@ -85,8 +85,8 @@ local container = {
                   mountPath: '/data',
                 } ]
                 + [
-                  { name: name } + params.extra_volumes[name].mount_spec
-                  for name in std.objectFields(params.extra_volumes)
+                  { name: name } + params.sli_reporting.extra_volumes.vshn_sli_reporting[name].mount_spec
+                  for name in std.objectFields(params.sli_reporting.extra_volumes.vshn_sli_reporting)
                 ],
   env: env,
 };
@@ -97,6 +97,16 @@ local sts = kube.StatefulSet('vshn-sli-reporting') {
     labels+: common.Labels,
   },
   spec+: {
+    resources: {
+      requests: {
+        memory: params.sli_reporting.resources.requests.memory,
+        cpu: params.sli_reporting.resources.requests.cpu,
+      },
+      limits: {
+        [if std.objectHas(params.sli_reporting.resources.limits, 'memory') then 'memory']: std.get(params.sli_reporting.resources.limits, 'memory'),
+        [if std.objectHas(params.sli_reporting.resources.limits, 'cpu') then 'cpu']: std.get(params.sli_reporting.resources.limits, 'cpu'),
+      },
+    },
     template+: {
       metadata+: {
         labels+: common.Labels,
@@ -106,7 +116,10 @@ local sts = kube.StatefulSet('vshn-sli-reporting') {
           container {
             name: 'db-init',
             args: [
-              'vshn-sli-reporting db init --db-file ' + params.db_file,
+              'db',
+              'init',
+              '--db-file',
+              params.sli_reporting.db_file,
             ],
           },
         ],
@@ -114,13 +127,29 @@ local sts = kube.StatefulSet('vshn-sli-reporting') {
           container {
             name: 'vshn-sli-reporting',
             args: [
-              'vshn-sli-reporting serve --auth-user ${VSR_AUTH_USER} --auth-pass ${VSR_AUTH_PASS} --lieutenant-namespace ${VSR_LIEUTENANT_NAMESPACE} --lieutenant-k8s-url ${VSR_LIEUTENANT_K8S_URL} --lieutenant-sa-token ${VSR_LIEUTENANT_SA_TOKEN} --db-file ' + params.db_file + ' --port 8080 --host 0.0.0.0',
+              'serve',
+              '--auth-user',
+              '$(VSR_AUTH_USER)',
+              '--auth-pass',
+              '$(VSR_AUTH_PASS)',
+              '--lieutenant-namespace',
+              '$(VSR_LIEUTENANT_NAMESPACE)',
+              '--lieutenant-k8s-url',
+              '$(VSR_LIEUTENANT_K8S_URL)',
+              '--lieutenant-sa-token',
+              '$(VSR_LIEUTENANT_SA_TOKEN)',
+              '--db-file',
+              params.sli_reporting.db_file,
+              'port',
+              '8080',
+              '--host',
+              '0.0.0.0',
             ],
           },
         ],
-        [if std.length(params.extra_volumes) > 0 then 'volumes']: [
-          { name: name } + params.extra_volumes[name].volume_spec
-          for name in std.objectFields(params.extra_volumes)
+        [if std.length(params.sli_reporting.extra_volumes.vshn_sli_reporting) > 0 then 'volumes']: [
+          { name: name } + params.sli_reporting.extra_volumes.vshn_sli_reporting[name].volume_spec
+          for name in std.objectFields(params.sli_reporting.extra_volumes.vshn_sli_reporting)
         ],
       },
     },
@@ -135,7 +164,7 @@ local sts = kube.StatefulSet('vshn-sli-reporting') {
           accessModes: [ 'ReadWriteOnce' ],
           resources: {
             requests: {
-              storage: params.storage_requests,
+              storage: params.sli_reporting.resources.requests.storage,
             },
           },
         },
