@@ -97,16 +97,6 @@ local sts = kube.StatefulSet('vshn-sli-reporting') {
     labels+: common.Labels,
   },
   spec+: {
-    resources: {
-      requests: {
-        memory: params.sli_reporting.resources.requests.memory,
-        cpu: params.sli_reporting.resources.requests.cpu,
-      },
-      limits: {
-        [if std.objectHas(params.sli_reporting.resources.limits, 'memory') then 'memory']: std.get(params.sli_reporting.resources.limits, 'memory'),
-        [if std.objectHas(params.sli_reporting.resources.limits, 'cpu') then 'cpu']: std.get(params.sli_reporting.resources.limits, 'cpu'),
-      },
-    },
     template+: {
       metadata+: {
         labels+: common.Labels,
@@ -145,6 +135,16 @@ local sts = kube.StatefulSet('vshn-sli-reporting') {
               '--host',
               '0.0.0.0',
             ],
+            resources: {
+              requests: {
+                memory: params.sli_reporting.resources.requests.memory,
+                cpu: params.sli_reporting.resources.requests.cpu,
+              },
+              limits: {
+                [if std.objectHas(params.sli_reporting.resources.limits, 'memory') then 'memory']: std.get(params.sli_reporting.resources.limits, 'memory'),
+                [if std.objectHas(params.sli_reporting.resources.limits, 'cpu') then 'cpu']: std.get(params.sli_reporting.resources.limits, 'cpu'),
+              },
+            },
           },
         ],
         [if std.length(params.sli_reporting.extra_volumes.vshn_sli_reporting) > 0 then 'volumes']: [

@@ -11,11 +11,6 @@ metadata:
   namespace: vshn-sli-reporting
 spec:
   replicas: 1
-  resources:
-    limits: {}
-    requests:
-      cpu: 100m
-      memory: 256Mi
   selector:
     matchLabels:
       app.kubernetes.io/managed-by: commodore
@@ -77,6 +72,11 @@ spec:
           name: vshn-sli-reporting
           ports:
             - containerPort: 8080
+          resources:
+            limits: {}
+            requests:
+              cpu: 100m
+              memory: 256Mi
           volumeMounts:
             - mountPath: /data
               name: vshn-sli-reporting-db
