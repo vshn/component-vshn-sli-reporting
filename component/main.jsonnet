@@ -117,24 +117,37 @@ local sts = kube.StatefulSet('vshn-sli-reporting') {
           container {
             name: 'vshn-sli-reporting',
             args: [
-              'serve',
-              '--auth-user',
-              '$(VSR_AUTH_USER)',
-              '--auth-pass',
-              '$(VSR_AUTH_PASS)',
-              '--lieutenant-namespace',
-              '$(VSR_LIEUTENANT_NAMESPACE)',
-              '--lieutenant-k8s-url',
-              '$(VSR_LIEUTENANT_K8S_URL)',
-              '--lieutenant-sa-token',
-              '$(VSR_LIEUTENANT_SA_TOKEN)',
-              '--db-file',
-              params.sli_reporting.db_file,
-              'port',
-              '8080',
-              '--host',
-              '0.0.0.0',
-            ],
+                    'serve',
+                    '--auth-user',
+                    '$(VSR_AUTH_USER)',
+                    '--auth-pass',
+                    '$(VSR_AUTH_PASS)',
+                    '--lieutenant-namespace',
+                    '$(VSR_LIEUTENANT_NAMESPACE)',
+                    '--lieutenant-k8s-url',
+                    '$(VSR_LIEUTENANT_K8S_URL)',
+                    '--lieutenant-sa-token',
+                    '$(VSR_LIEUTENANT_SA_TOKEN)',
+                    '--db-file',
+                    params.sli_reporting.db_file,
+                    'port',
+                    '8080',
+                    '--host',
+                    '0.0.0.0',
+                  ]
+                  +
+                  std.flattenArrays([
+                    [
+                      '--prometheus-headers',
+                      '%s=%s' % [ k, params.sli_reporting.prometheus.headers[k] ],
+                    ]
+                    for k in std.objectFields(std.get(params.sli_reporting.prometheus, 'headers', {}))
+                  ])
+                  +
+                  if std.get(params.sli_reporting.prometheus, 'url', '') != '' then [
+                    '--prometheus-url',
+                    params.sli_reporting.prometheus.url,
+                  ] else [],
             resources: {
               requests: {
                 memory: params.sli_reporting.resources.requests.memory,

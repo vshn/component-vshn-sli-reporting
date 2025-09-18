@@ -9,7 +9,7 @@ parameters:
       sli_reporting:
         registry: ghcr.io
         repository: vshn/vshn-sli-reporting
-        tag: v0.1.2
+        tag: v0.2.0
 
     sli_reporting:
       resources:
@@ -32,6 +32,10 @@ parameters:
 
       extra_volumes:
         vshn_sli_reporting: {}
+
+      prometheus:
+        url: ""
+        headers: {}
 
     network_policies:
       target_namespaces: {}
