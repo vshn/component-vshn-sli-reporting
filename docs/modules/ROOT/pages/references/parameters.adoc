@@ -87,6 +87,29 @@ default:: lieutenant
 
 Namespace in which Cluster resources can be found on the Lieutenant cluster.
 
+== `sli_reporting.prometheus.url`
+
+[horizontal]
+type:: string
+default:: ""
+example:: "http://prometheus-operated.monitoring.svc.cluster.local:9090"
+
+URL of the Prometheus instance to query for SLI data.
+
+== `sli_reporting.prometheus.headers`
+
+[horizontal]
+type:: dictionary
+default:: {}
+example::
++
+[source,yaml]
+----
+X-Scope-OrgID: appuio-managed-openshift-metrics
+----
+
+Additional HTTP headers to be sent to the SLI Prometheus instance.
+
 == `network_policies.target_namespaces`
 
 [horizontal]

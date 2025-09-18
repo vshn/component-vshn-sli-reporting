@@ -1,3 +1,7 @@
-# Overwrite parameters here
-
-# parameters: {...}
+parameters:
+  vshn_sli_reporting:
+    sli_reporting:
+      prometheus:
+        url: "prometheus:9090"
+        headers:
+          X-Scope-OrgID: appuio-managed-openshift-metrics
