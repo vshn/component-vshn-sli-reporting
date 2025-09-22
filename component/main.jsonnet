@@ -186,6 +186,18 @@ local sts = kube.StatefulSet('vshn-sli-reporting') {
   },
 };
 
+local svc = kube.Service('vshn-sli-reporting') {
+  spec+: {
+    selector: sts.spec.template.metadata.labels,
+    ports: [ {
+      port: 80,
+      targetPort: 8080,
+      protocol: 'TCP',
+      name: 'http',
+    } ],
+  },
+};
+
 {
   '00_namespace': kube.Namespace(params.namespace) {
     metadata+: {
@@ -196,4 +208,5 @@ local sts = kube.StatefulSet('vshn-sli-reporting') {
   '10_auth_secret': authSecret,
   '10_lieutenant_secret': lieutenantSecret,
   '30_sts': sts,
+  '30_svc': svc,
 }

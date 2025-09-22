@@ -1,0 +1,19 @@
+apiVersion: v1
+kind: Service
+metadata:
+  annotations: {}
+  labels:
+    name: vshn-sli-reporting
+  name: vshn-sli-reporting
+spec:
+  ports:
+    - name: http
+      port: 80
+      protocol: TCP
+      targetPort: 8080
+  selector:
+    app.kubernetes.io/managed-by: commodore
+    app.kubernetes.io/name: appuio-reporting
+    app.kubernetes.io/part-of: syn
+    name: vshn-sli-reporting
+  type: ClusterIP
