@@ -1,6 +1,6 @@
 {
   "template": "https://github.com/projectsyn/commodore-component-template.git",
-  "commit": "56dd2ee980f197ec2c8b3977c16458e43d0c6ef2",
+  "commit": "84a7c63ca26492da555344c23ccddac302ba0bb2",
   "checkout": "main",
   "context": {
     "cookiecutter": {
@@ -25,7 +25,7 @@
       "github_name": "component-vshn-sli-reporting",
       "github_url": "https://github.com/vshn/component-vshn-sli-reporting",
       "_template": "https://github.com/projectsyn/commodore-component-template.git",
-      "_commit": "56dd2ee980f197ec2c8b3977c16458e43d0c6ef2"
+      "_commit": "84a7c63ca26492da555344c23ccddac302ba0bb2"
     }
   },
   "directory": null
