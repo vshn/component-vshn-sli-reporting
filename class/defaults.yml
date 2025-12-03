@@ -9,7 +9,7 @@ parameters:
       sli_reporting:
         registry: ghcr.io
         repository: vshn/vshn-sli-reporting
-        tag: v0.3.1
+        tag: v0.3.2
 
     sli_reporting:
       resources:
