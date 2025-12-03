@@ -72,7 +72,7 @@ spec:
                 secretKeyRef:
                   key: k8s_url
                   name: lieutenant-credentials
-          image: ghcr.io/vshn/vshn-sli-reporting:v0.3.0
+          image: ghcr.io/vshn/vshn-sli-reporting:v0.3.1
           name: vshn-sli-reporting
           ports:
             - containerPort: 8080
@@ -113,7 +113,7 @@ spec:
                 secretKeyRef:
                   key: k8s_url
                   name: lieutenant-credentials
-          image: ghcr.io/vshn/vshn-sli-reporting:v0.3.0
+          image: ghcr.io/vshn/vshn-sli-reporting:v0.3.1
           name: db-init
           ports:
             - containerPort: 8080
